@@ -1,0 +1,79 @@
+graph TB
+    subgraph "Управление Terraform (IaC)"
+        direction TB
+        TF[terraform apply<br/>main.tf]
+        TF_VAR[terraform.tfvars<br/>Переменные]
+
+        subgraph "Yandex Cloud - ru-central1-a"
+            VPC[VPC Network<br/>network-1]
+            SUBNET[Subnet<br/>subnet-1<br/>192.168.10.0/24]
+
+            subgraph "Виртуальная машина 1"
+                VM1[Compute Instance<br/>test-vm-1]
+                DISK1[Boot Disk 1<br/>15GB network-hdd]
+                NIC1[Network Interface<br/>NAT: Enabled]
+            end
+
+            subgraph "Виртуальная машина 2"
+                VM2[Compute Instance<br/>test-vm-2]
+                DISK2[Boot Disk 2<br/>15GB network-hdd]
+                NIC2[Network Interface<br/>NAT: Enabled]
+            end
+
+            IMG[Ubuntu 22.04 LTS Image]
+        end
+    end
+
+    subgraph "Ручная настройка / User Data"
+        META[meta.txt - cloud-init]
+        APT[apt update && apt upgrade]
+        PKG[Установка пакетов<br/>nginx, docker, etc.]
+        CFG[Конфигурация сервисов]
+        USR[Создание пользователей]
+        SSH[Настройка SSH-ключей]
+    end
+
+    subgraph "Внешний доступ"
+        EXT1[External IP VM1<br/>Динамический NAT]
+        EXT2[External IP VM2<br/>Динамический NAT]
+        INT1[Internal IP VM1<br/>192.168.10.x]
+        INT2[Internal IP VM2<br/>192.168.10.x]
+    end
+
+    TF --> TF_VAR
+    TF --> VPC
+    VPC --> SUBNET
+    SUBNET --> NIC1
+    SUBNET --> NIC2
+    IMG --> DISK1
+    IMG --> DISK2
+    DISK1 --> VM1
+    DISK2 --> VM2
+    NIC1 --> VM1
+    NIC2 --> VM2
+    VM1 --> INT1
+    VM2 --> INT2
+    NIC1 --> EXT1
+    NIC2 --> EXT2
+
+    META --> VM1
+    META --> VM2
+    VM1 --> APT
+    VM2 --> APT
+    APT --> PKG
+    PKG --> CFG
+    CFG --> USR
+    USR --> SSH
+
+    style TF fill:#844FBA,color:white
+    style VPC fill:#5BC0DE,color:black
+    style SUBNET fill:#5BC0DE,color:black
+    style VM1 fill:#5BC0DE,color:black
+    style VM2 fill:#5BC0DE,color:black
+    style DISK1 fill:#5BC0DE,color:black
+    style DISK2 fill:#5BC0DE,color:black
+    style IMG fill:#5BC0DE,color:black
+    style META fill:#F0AD4E,color:black
+    style APT fill:#F0AD4E,color:black
+    style PKG fill:#F0AD4E,color:black
+    style CFG fill:#F0AD4E,color:black
