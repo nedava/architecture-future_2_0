@@ -4,6 +4,24 @@
 
 [Диаграмма контейнеров в нотации С4](c4_tobe.drawio)
 
+### Миграция ESB Apache Camel на DataMesh архитектуру
+
+- Транспорт: Camel (JMS, HTTP, MQ) -> Apache Kafka
+- Интеграции: Camel components (file, jdbc, soap, rest) -> Kafka Connect/domain adapters
+- ФЛК: Camel processors, XSD ->
+  - структурный контроль: с помощью Schema Registry, проверка формата на входе в Kafka
+  - логический контроль: на уровне Spark-обработчиков
+- ETL: Camel -> Apache Spark (Batch ETL / Structured Streaming ETL)
+- Маршрутизация: Camel routes -> Kafka topics
+- Оркестрация: Camel timers, sequencing, retries -> Apache Airflow
+
+#### Переходный период по этапам
+
+1. ESB → Kafka (bridge). Camel остаётся, Kafka — новый транспорт, ETL в Camel
+2. Вынос ETL из ESB. Camel теряет трансформации, Spark начинает выполнять ETL, ФЛК переносится в Spark
+3. Camel остаётся только как legacy adapter, protocol bridge
+4. Полный отказ от ESB. Kafka Connect/adapters, Spark ETL, Airflow-оркестрация
+
 
 ## Анализ проблемных мест и их приоритизация
 
